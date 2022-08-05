@@ -1,5 +1,8 @@
-﻿using ImGuiNET;
+﻿using Dalamud.Game.Text;
+using Dalamud.Logging;
+using ImGuiNET;
 using System;
+using System.Collections.Generic;
 using System.Numerics;
 
 namespace SamplePlugin
@@ -63,7 +66,6 @@ namespace SamplePlugin
             ImGui.SetNextWindowSizeConstraints(new Vector2(375, 330), new Vector2(float.MaxValue, float.MaxValue));
             if (ImGui.Begin("My Amazing Window", ref this.visible, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
             {
-                ImGui.Text($"The random config bool is {this.configuration.SomePropertyToBeSavedAndWithADefault}");
 
                 if (ImGui.Button("Show Settings"))
                 {
@@ -87,18 +89,50 @@ namespace SamplePlugin
                 return;
             }
 
-            ImGui.SetNextWindowSize(new Vector2(232, 75), ImGuiCond.Always);
-            if (ImGui.Begin("A Wonderful Configuration Window", ref this.settingsVisible,
-                ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+            ImGui.SetNextWindowSize(new Vector2(300, 400), ImGuiCond.FirstUseEver);
+            if (ImGui.Begin("Proximity chat config", ref this.settingsVisible,
+                  ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
             {
-                // can't ref a property, so use a local copy
-                var configValue = this.configuration.SomePropertyToBeSavedAndWithADefault;
-                if (ImGui.Checkbox("Random Config Bool", ref configValue))
+                var distance = configuration.Distance;
+                if (ImGui.InputDouble("Yalm distance", ref distance))
                 {
-                    this.configuration.SomePropertyToBeSavedAndWithADefault = configValue;
-                    // can save immediately on change, if you don't want to provide a "Save and Close" button
+                    PluginLog.Debug($"Distance set to {distance}");
+                    configuration.Distance = distance; //might need some conversion here idk?
                     this.configuration.Save();
                 }
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.SetTooltip("Anything over this distance in Yalms will not be shown");
+                }
+                ImGui.Columns(2);
+
+                foreach (var e in new List<XivChatType>() { XivChatType.Ls1, XivChatType.Ls2, XivChatType.Ls3, XivChatType.Ls4,
+                    XivChatType.Ls5, XivChatType.Ls6, XivChatType.Ls7, XivChatType.Ls8, XivChatType.CrossLinkShell1,
+                    XivChatType.CrossLinkShell2, XivChatType.CrossLinkShell3, XivChatType.CrossLinkShell4,
+                    XivChatType.CrossLinkShell5, XivChatType.CrossLinkShell6, XivChatType.CrossLinkShell7,
+                    XivChatType.CrossLinkShell8, XivChatType.FreeCompany, XivChatType.Party, XivChatType.CrossParty,
+                    XivChatType.Alliance })
+                {
+                    var enabled = configuration.Channels.Contains(e);
+                    if (ImGui.Checkbox($"{e}", ref enabled))
+                    {
+                        if (enabled)
+                        {
+                            PluginLog.Debug($"Channel {e} enabled");
+                            configuration.Channels.Add(e);
+                        }
+                        else
+                        {
+                            PluginLog.Debug($"Channel {e} disabled");
+                            configuration.Channels.Remove(e);
+                        }
+                        this.configuration.Save();
+                    }
+                    ImGui.NextColumn();
+                }
+
+                ImGui.Columns(1);
+
             }
             ImGui.End();
         }
