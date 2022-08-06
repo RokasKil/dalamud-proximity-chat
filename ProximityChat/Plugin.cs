@@ -180,7 +180,8 @@ namespace SamplePlugin
                         continue;
                     }
                     var playerName = PluginServices.ClientState.LocalPlayer.Name.TextValue;
-                    if (textPayload.Text == playerName)
+                    PluginLog.Log(textPayload.Text != null ? textPayload.Text : "Actually just null fr");
+                    if (textPayload.Text != null && textPayload.Text.IndexOf(playerName) >= 0)
                     {
                         return true;
                     }

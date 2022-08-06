@@ -102,7 +102,7 @@ namespace SamplePlugin
                 }
                 if (ImGui.IsItemHovered())
                 {
-                    ImGui.SetTooltip("Anything over this distance in Yalms will not be shown");
+                    ImGui.SetTooltip("Anything over this distance in Yalms will not be shown\nDefault say chat range is 20");
                 }
                 ImGui.Columns(2);
 
