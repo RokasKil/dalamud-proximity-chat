@@ -11,35 +11,28 @@ namespace SamplePlugin
     // to do any cleanup
     class PluginUI : IDisposable
     {
-        private Configuration configuration;
+        private readonly Configuration configuration;
+        private static readonly List<XivChatType> possibleChannels = new List<XivChatType>() { XivChatType.Ls1, XivChatType.Ls2, XivChatType.Ls3, XivChatType.Ls4,
+                    XivChatType.Ls5, XivChatType.Ls6, XivChatType.Ls7, XivChatType.Ls8, XivChatType.CrossLinkShell1,
+                    XivChatType.CrossLinkShell2, XivChatType.CrossLinkShell3, XivChatType.CrossLinkShell4,
+                    XivChatType.CrossLinkShell5, XivChatType.CrossLinkShell6, XivChatType.CrossLinkShell7,
+                    XivChatType.CrossLinkShell8, XivChatType.FreeCompany, XivChatType.Party, XivChatType.CrossParty,
+                    XivChatType.Alliance };
 
-        private ImGuiScene.TextureWrap goatImage;
-
-        // this extra bool exists for ImGui, since you can't ref a property
-        private bool visible = false;
-        public bool Visible
-        {
-            get { return this.visible; }
-            set { this.visible = value; }
-        }
-
-        private bool settingsVisible = false;
+    private bool settingsVisible = false;
         public bool SettingsVisible
         {
             get { return this.settingsVisible; }
             set { this.settingsVisible = value; }
         }
 
-        // passing in the image here just for simplicity
-        public PluginUI(Configuration configuration, ImGuiScene.TextureWrap goatImage)
+        public PluginUI(Configuration configuration)
         {
             this.configuration = configuration;
-            this.goatImage = goatImage;
         }
 
         public void Dispose()
         {
-            this.goatImage.Dispose();
         }
 
         public void Draw()
@@ -51,35 +44,7 @@ namespace SamplePlugin
             // There are other ways to do this, but it is generally best to keep the number of
             // draw delegates as low as possible.
 
-            DrawMainWindow();
             DrawSettingsWindow();
-        }
-
-        public void DrawMainWindow()
-        {
-            if (!Visible)
-            {
-                return;
-            }
-
-            ImGui.SetNextWindowSize(new Vector2(375, 330), ImGuiCond.FirstUseEver);
-            ImGui.SetNextWindowSizeConstraints(new Vector2(375, 330), new Vector2(float.MaxValue, float.MaxValue));
-            if (ImGui.Begin("My Amazing Window", ref this.visible, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
-            {
-
-                if (ImGui.Button("Show Settings"))
-                {
-                    SettingsVisible = true;
-                }
-
-                ImGui.Spacing();
-
-                ImGui.Text("Have a goat:");
-                ImGui.Indent(55);
-                ImGui.Image(this.goatImage.ImGuiHandle, new Vector2(this.goatImage.Width, this.goatImage.Height));
-                ImGui.Unindent(55);
-            }
-            ImGui.End();
         }
 
         public void DrawSettingsWindow()
@@ -89,15 +54,17 @@ namespace SamplePlugin
                 return;
             }
 
-            ImGui.SetNextWindowSize(new Vector2(300, 400), ImGuiCond.FirstUseEver);
-            if (ImGui.Begin("Proximity chat config", ref this.settingsVisible,
-                  ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+            ImGui.SetNextWindowSize(new Vector2(300, 350), ImGuiCond.FirstUseEver);
+            if (ImGui.Begin("Proximity Chat configuration", ref this.settingsVisible,
+                  ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
             {
                 var distance = configuration.Distance;
+
+                //partially stolen from https://github.com/Haplo064/ChatBubbles
                 if (ImGui.InputDouble("Yalm distance", ref distance))
                 {
                     PluginLog.Debug($"Distance set to {distance}");
-                    configuration.Distance = distance; //might need some conversion here idk?
+                    configuration.Distance = distance;
                     this.configuration.Save();
                 }
                 if (ImGui.IsItemHovered())
@@ -105,13 +72,7 @@ namespace SamplePlugin
                     ImGui.SetTooltip("Anything over this distance in Yalms will not be shown\nDefault say chat range is 20");
                 }
                 ImGui.Columns(2);
-
-                foreach (var e in new List<XivChatType>() { XivChatType.Ls1, XivChatType.Ls2, XivChatType.Ls3, XivChatType.Ls4,
-                    XivChatType.Ls5, XivChatType.Ls6, XivChatType.Ls7, XivChatType.Ls8, XivChatType.CrossLinkShell1,
-                    XivChatType.CrossLinkShell2, XivChatType.CrossLinkShell3, XivChatType.CrossLinkShell4,
-                    XivChatType.CrossLinkShell5, XivChatType.CrossLinkShell6, XivChatType.CrossLinkShell7,
-                    XivChatType.CrossLinkShell8, XivChatType.FreeCompany, XivChatType.Party, XivChatType.CrossParty,
-                    XivChatType.Alliance })
+                foreach (var e in possibleChannels)
                 {
                     var enabled = configuration.Channels.Contains(e);
                     if (ImGui.Checkbox($"{e}", ref enabled))

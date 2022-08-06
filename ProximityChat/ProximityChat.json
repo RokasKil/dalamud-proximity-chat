@@ -1,11 +1,11 @@
 {
   "Author": "Speedas",
-  "Name": "Proximity chat",
-  "Punchline": "A short one-liner that shows up in /xlplugins.",
-  "Description": "A description that shows up in /xlplugins. List any major slash-command(s).",
+  "Name": "Proximity Chat",
+  "Punchline": "Makes chat channels proximity based",
+  "Description": "Allows you to convert chosen chat channels into proximity based ones like say chat.\nIt is achieved by hidding messages on the client side, players without this plugin will still be able to see them.",
   "InternalName": "proximityChat",
   "ApplicableVersion": "any",
-  "Tags": [
-    "chat"
-  ]
+  "Tags": [ "Chat", "Social" ],
+  "CategoryTags": [ "Social" ],
+  "RepoUrl": "https://github.com/RokasKil/dalamud-proximity-chat"
 }
